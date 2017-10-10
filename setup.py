@@ -12,5 +12,11 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=[],
+    install_requires=['docopt'],
+
+    entry_points={
+        'console_scripts': [
+            'w2u=w2u_cli.w2c:main',
+        ],
+    }
 )
