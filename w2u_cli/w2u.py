@@ -34,6 +34,7 @@ commands = {
     'enable': cmds.enable,
     'disable': cmds.disable,
     'set': cmds.set,
+    'get': cmds.get,
 }
 
 

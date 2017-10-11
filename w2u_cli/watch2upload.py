@@ -136,6 +136,8 @@ class Watch2Upload:
         :raise KeyError:   if the specified config key was not recognized
         :raise ValueError: if the specified value is invalid for the
                            specified configuration
+        :raise DirectoryNotFoundError: if *directory* is not included in the
+                                       watch list
         """
         watch = self._find_watch(directory)
 
@@ -159,6 +161,34 @@ class Watch2Upload:
                 watch.delete = False
             else:
                 raise ValueError("unexpected value `%s`" % value)
+
+        else:
+            raise KeyError("unrecognized key")
+
+    def get_conf(self, directory, config):
+        """
+        Gets the value for the configuration identified by the specified
+        key/label.
+
+        :param directory: watched directory to get value for
+        :param config:    key for the configuration to get value for
+        :raise KeyError:   if the specified config key was not recognized
+        :raise DirectoryNotFoundError: if *directory* is not included in the
+                                       watch list
+        """
+        watch = self._find_watch(directory)
+
+        if config == 'remote-dir':
+            return watch.remote_dir
+
+        elif config == 'remote-url':
+            return watch.remote_url
+
+        elif config == 'remote-username':
+            return watch.remote_username
+
+        elif config == 'delete':
+            return "1" if watch.delete else "0"
 
         else:
             raise KeyError("unrecognized key")

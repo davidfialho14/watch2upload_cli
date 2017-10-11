@@ -198,5 +198,42 @@ Config keys:
         sys.exit(1)
 
 
+def get(watch2upload: Watch2Upload):
+    """
+The get command retrieves the value of the specified configuration.
+
+Usage:
+  w2u get <config> <directory>
+
+Arguments:
+  <config>     Configuration key name
+  <directory>  Directory (in watch list) from which the configuration value is to be read
+
+Config keys:
+  remote-dir       Remote directory to where directory's data is uploaded
+  remote-url       URL of the remote server to where data is uploaded
+  remote-username  Username to login to the server
+  delete           Enable/disable deleting files after they are uploaded
+                   (enable=1 and disable=0)
+"""
+    args = docopt(str(get.__doc__))
+    config = args['<config>']
+    directory = args['<directory>']
+
+    try:
+        print(watch2upload.get_conf(directory, config))
+
+    except DirectoryNotFoundError as error:
+        print("error:", str(error), file=sys.stderr)
+        print("  type \"w2u list --all\" to see all watches")
+        sys.exit(1)
+
+    except KeyError:
+        print("error: configuration key `%s` unknown" % config, file=sys.stderr)
+        print("  type \"w2u get --help\" to see all configuration keys "
+              "available", file=sys.stderr)
+        sys.exit(1)
+
+
 def _check_mark(option: bool):
     return "✔" if option else "x"
