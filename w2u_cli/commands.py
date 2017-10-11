@@ -1,7 +1,50 @@
+import sys
+
 from docopt import docopt
 from prettytable import PrettyTable
 
-from w2u_cli.watch2upload import Watch2Upload
+from w2u_cli.watch2upload import Watch2Upload, RemoteNotFoundError, \
+    DirectoryExistsError
+
+
+def add(watch2upload: Watch2Upload):
+    """
+The add command adds the specified directory to the list of watched directories.
+
+See "list" command to look at all directories being watched.
+The added directory is enabled by default, see "enable" and "disable" commands.
+
+Usage:
+  w2u add <directory> <remote_id> <remote_dir> [--delete]
+
+Options:
+  --delete  Delete files once they are uploaded to the remote server
+"""
+    args = docopt(str(add.__doc__))
+
+    directory = args['<directory>']
+    remote_id = args['<remote_id>']
+    remote_dir = args['<remote_dir>']
+    delete_option = args['--delete']
+
+    try:
+        watch2upload.add_watch(directory, remote_id, remote_dir, delete_option)
+
+    except ValueError as error:
+        print("error:", str(error), file=sys.stderr)
+        sys.exit(1)
+
+    except RemoteNotFoundError as error:
+        print("error:", str(error), file=sys.stderr)
+        print("  type \"w2u remote list\" to see all remotes")
+        sys.exit(1)
+
+    except DirectoryExistsError as error:
+        print("error:", str(error), file=sys.stderr)
+        print("  type \"w2u list --all\" to see all watches")
+        print("  type \"w2u get remote %s\" to see the remote associated with "
+              "the directory" % directory)
+        sys.exit(1)
 
 
 def list(watch2upload: Watch2Upload):
@@ -13,7 +56,7 @@ Usage:
 
 Options:
   -a --all  Show all watched directories, including disabled directories
-    """
+"""
     args = docopt(str(list.__doc__))
     list_all = args['--all']
 

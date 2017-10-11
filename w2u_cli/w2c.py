@@ -23,8 +23,14 @@ Commands:
 import sys
 from docopt import docopt
 
-from w2u_cli.commands import list_cmd
+import w2u_cli.commands as cmds
 from w2u_cli.watch2upload import Watch2Upload
+
+
+commands = {
+    'add': cmds.add,
+    'list': cmds.list,
+}
 
 
 def main():
@@ -43,13 +49,12 @@ def main():
     #     the code.
     #
     argv = sys.argv[1] if len(sys.argv) > 1 else []
-    args = docopt(__doc__, argv)
+    args = docopt(__doc__, argv, version="Watch2Upload CLI v0.1")
     command_name = args['<command>']
 
-    if command_name == "list":
-        command = list_cmd
-
-    else:
+    try:
+        command = commands[command_name]
+    except KeyError:
         print("Command '%s' was not recognized, see \"w2c --help\"" %
               command_name, file=sys.stderr)
         sys.exit(1)
