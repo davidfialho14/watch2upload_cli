@@ -20,12 +20,42 @@ Commands:
   get      Prints a configuration option
   remote   Manages remote servers
 """
+import sys
 from docopt import docopt
+
+from w2u_cli.commands import list_cmd
+from w2u_cli.watch2upload import Watch2Upload
 
 
 def main():
-    args = docopt(__doc__)
-    print(args)
+
+    # Here we want to parse only the first input argument (the command) and
+    # allow any other arguments following the first.
+    # Since it is only one argument, the use of docopt maybe overkill
+    #
+    # Two reasons to support the use of docopt here:
+    #   - keep consistency in error message. For instance, when there are no
+    #     arguments the error message includes only the usage and not all the
+    #     help message
+    #   - makes it easier to make changes. If in the future one or two
+    #     arguments are support, or even some options other than hel and
+    #     version, docopt will handle that very easily without much change to
+    #     the code.
+    #
+    argv = sys.argv[1] if len(sys.argv) > 1 else []
+    args = docopt(__doc__, argv)
+    command_name = args['<command>']
+
+    if command_name == "list":
+        command = list_cmd
+
+    else:
+        print("Command '%s' was not recognized, see \"w2c --help\"" %
+              command_name, file=sys.stderr)
+        sys.exit(1)
+
+    watch2upload = Watch2Upload()
+    command(watch2upload)
 
 
 if __name__ == '__main__':
