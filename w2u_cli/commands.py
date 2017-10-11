@@ -197,33 +197,6 @@ Config keys:
         print("  type \"w2u set --help\" for help", file=sys.stderr)
         sys.exit(1)
 
-    table = PrettyTable((
-        "Directory",
-        "Enabled",
-        "Remote Directory",
-        "URL",
-        "Username",
-        "Delete Option"
-    ))
-
-    # Align the following columns to the left
-    table.align["Directory"] = "l"
-    table.align["Remote Directory"] = "l"
-    table.align["URL"] = "l"
-    table.align["Username"] = "l"
-
-    for watch in watch2upload.watches():
-        table.add_row((
-            watch.directory,
-            _check_mark(watch.enable),
-            watch.remote_dir,
-            watch.remote_url,
-            watch.remote_username,
-            _check_mark(watch.delete),
-        ))
-
-    print(table)
-
 
 def _check_mark(option: bool):
     return "✔" if option else "x"
