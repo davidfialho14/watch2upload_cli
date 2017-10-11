@@ -11,6 +11,10 @@ class RemoteNotFoundError(Exception):
     """ Raised when a remote is not found """
 
 
+class DirectoryNotFoundError(Exception):
+    """ Raised when a directory is not found in the watch list """
+
+
 class DirectoryExistsError(Exception):
     """ Raised trying to add a directory that already exists """
 
@@ -99,3 +103,23 @@ class Watch2Upload:
             return self._watches
         else:
             return [watch for watch in self._watches if watch.enable is enabled]
+
+    def remove_watch(self, directory):
+        """
+
+        :param directory:
+        :raise DirectoryNotFoundError: if the specified directory is not
+                                       found in the watch list
+        """
+        full_directory = os.path.abspath(directory)
+
+        watch_to_remove = None
+        for watch in self._watches:
+            if watch.directory == full_directory:
+                watch_to_remove = watch
+
+        if watch_to_remove is None:
+            raise DirectoryNotFoundError("directory `%s` not found in watch "
+                                         "list" % directory)
+
+        self._watches.remove(watch_to_remove)

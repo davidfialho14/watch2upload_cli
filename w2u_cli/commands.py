@@ -4,7 +4,7 @@ from docopt import docopt
 from prettytable import PrettyTable
 
 from w2u_cli.watch2upload import Watch2Upload, RemoteNotFoundError, \
-    DirectoryExistsError
+    DirectoryExistsError, DirectoryNotFoundError
 
 
 def add(watch2upload: Watch2Upload):
@@ -89,6 +89,28 @@ Options:
         ))
 
     print(table)
+
+
+def remove(watch2upload: Watch2Upload):
+    """
+The remove command removes the specified directories from the watched
+directories list.
+
+See "list" command to look at all directories being watched.
+
+Usage:
+  w2u remove <directory>
+"""
+    args = docopt(str(remove.__doc__))
+    directory = args['<directory>']
+
+    try:
+        watch2upload.remove_watch(directory)
+
+    except DirectoryNotFoundError as error:
+        print("warning:", str(error), file=sys.stderr)
+        print("  type \"w2u list --all\" to see all watches")
+        sys.exit(1)
 
 
 def _check_mark(option: bool):

@@ -30,6 +30,7 @@ from w2u_cli.watch2upload import Watch2Upload
 commands = {
     'add': cmds.add,
     'list': cmds.list,
+    'remove': cmds.remove,
 }
 
 
