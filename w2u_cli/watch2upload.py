@@ -1,8 +1,10 @@
 import os
 from collections import namedtuple
+from recordclass import recordclass
 
-Watch = namedtuple("Watch", "directory remote_url remote_username "
-                            "remote_dir enable delete")
+
+Watch = recordclass("Watch", "directory remote_url remote_username "
+                             "remote_dir enable delete")
 
 Remote = namedtuple("Remote", "id url username")
 
@@ -123,3 +125,31 @@ class Watch2Upload:
                                          "list" % directory)
 
         self._watches.remove(watch_to_remove)
+
+    def enable_watch(self, directory):
+        full_directory = os.path.abspath(directory)
+
+        watch_to_enable = None
+        for watch in self._watches:
+            if watch.directory == full_directory:
+                watch_to_enable = watch
+
+        if watch_to_enable is None:
+            raise DirectoryNotFoundError("directory `%s` not found in watch "
+                                         "list" % directory)
+
+        watch_to_enable.enable = True
+
+    def disable_watch(self, directory):
+        full_directory = os.path.abspath(directory)
+
+        watch_to_disable = None
+        for watch in self._watches:
+            if watch.directory == full_directory:
+                watch_to_disable = watch
+
+        if watch_to_disable is None:
+            raise DirectoryNotFoundError("directory `%s` not found in watch "
+                                         "list" % directory)
+
+        watch_to_disable.enable = False

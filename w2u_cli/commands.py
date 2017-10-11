@@ -113,5 +113,45 @@ Usage:
         sys.exit(1)
 
 
+def enable(watch2upload: Watch2Upload):
+    """
+The enable command enables actively watching a directory that is not actively
+watched.
+
+Usage:
+  w2u enable <directory>
+"""
+    args = docopt(str(enable.__doc__))
+    directory = args['<directory>']
+
+    try:
+        watch2upload.enable_watch(directory)
+
+    except DirectoryNotFoundError as error:
+        print("warning:", str(error), file=sys.stderr)
+        print("  type \"w2u list --all\" to see all watches")
+        sys.exit(1)
+
+
+def disable(watch2upload: Watch2Upload):
+    """
+The disable command disables watching a directory that is being actively
+watched.
+
+Usage:
+  w2u disable <directory>
+"""
+    args = docopt(str(disable.__doc__))
+    directory = args['<directory>']
+
+    try:
+        watch2upload.disable_watch(directory)
+
+    except DirectoryNotFoundError as error:
+        print("warning:", str(error), file=sys.stderr)
+        print("  type \"w2u list --all\" to see all watches")
+        sys.exit(1)
+
+
 def _check_mark(option: bool):
     return "✔" if option else "x"

@@ -31,6 +31,8 @@ commands = {
     'add': cmds.add,
     'list': cmds.list,
     'remove': cmds.remove,
+    'enable': cmds.enable,
+    'disable': cmds.disable,
 }
 
 
