@@ -128,7 +128,7 @@ Usage:
         watch2upload.enable_watch(directory)
 
     except DirectoryNotFoundError as error:
-        print("warning:", str(error), file=sys.stderr)
+        print("error:", str(error), file=sys.stderr)
         print("  type \"w2u list --all\" to see all watches")
         sys.exit(1)
 
@@ -148,9 +148,81 @@ Usage:
         watch2upload.disable_watch(directory)
 
     except DirectoryNotFoundError as error:
-        print("warning:", str(error), file=sys.stderr)
+        print("error:", str(error), file=sys.stderr)
         print("  type \"w2u list --all\" to see all watches")
         sys.exit(1)
+
+
+def set(watch2upload: Watch2Upload):
+    """
+The set command changes the value of the specified configuration.
+
+Usage:
+  w2u set <config> <value> <directory>
+
+Arguments:
+  <config>     Configuration key name
+  <value>      Value to set for the configuration
+  <directory>  Directory (in watch list) to set configuration for
+
+Config keys:
+  remote-dir       Remote directory where to upload directory's data
+  remote-url       URL of the remote server where to upload data
+  remote-username  Username to login to the server
+  remote-password  Password to login to the server
+  delete           Enable/disable deleting files after they are uploaded
+                   (enable=1 and disable=0)
+"""
+    args = docopt(str(set.__doc__))
+    config = args['<config>']
+    value = args['<value>']
+    directory = args['<directory>']
+
+    try:
+        watch2upload.set_conf(directory, config, value)
+
+    except DirectoryNotFoundError as error:
+        print("error:", str(error), file=sys.stderr)
+        print("  type \"w2u list --all\" to see all watches")
+        sys.exit(1)
+
+    except KeyError:
+        print("error: configuration key `%s` unknown" % config, file=sys.stderr)
+        print("  type \"w2u set --help\" to see all configuration keys "
+              "available", file=sys.stderr)
+        sys.exit(1)
+
+    except ValueError as error:
+        print("error:", str(error), file=sys.stderr)
+        print("  type \"w2u set --help\" for help", file=sys.stderr)
+        sys.exit(1)
+
+    table = PrettyTable((
+        "Directory",
+        "Enabled",
+        "Remote Directory",
+        "URL",
+        "Username",
+        "Delete Option"
+    ))
+
+    # Align the following columns to the left
+    table.align["Directory"] = "l"
+    table.align["Remote Directory"] = "l"
+    table.align["URL"] = "l"
+    table.align["Username"] = "l"
+
+    for watch in watch2upload.watches():
+        table.add_row((
+            watch.directory,
+            _check_mark(watch.enable),
+            watch.remote_dir,
+            watch.remote_url,
+            watch.remote_username,
+            _check_mark(watch.delete),
+        ))
+
+    print(table)
 
 
 def _check_mark(option: bool):

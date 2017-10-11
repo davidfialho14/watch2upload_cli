@@ -33,6 +33,7 @@ commands = {
     'remove': cmds.remove,
     'enable': cmds.enable,
     'disable': cmds.disable,
+    'set': cmds.set,
 }
 
 

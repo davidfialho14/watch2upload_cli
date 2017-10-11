@@ -2,7 +2,6 @@ import os
 from collections import namedtuple
 from recordclass import recordclass
 
-
 Watch = recordclass("Watch", "directory remote_url remote_username "
                              "remote_dir enable delete")
 
@@ -88,16 +87,19 @@ class Watch2Upload:
         except KeyError:
             raise RemoteNotFoundError("remote with id=%s not found" % remote_id)
 
-        full_directory = os.path.abspath(directory)
+        # Raise error if watch already exists
+        if self._find_watch(directory):
+            raise DirectoryExistsError("directory `%s` is already being "
+                                       "watched" % directory)
 
-        # Check if the watch already exists
-        for watch in self._watches:
-            if watch.directory == full_directory:
-                raise DirectoryExistsError("directory `%s` is already being "
-                                           "watched" % directory)
-
-        self._watches.append(Watch(full_directory, remote_url, remote_username,
-                                   remote_dir, enable, delete))
+        self._watches.append(Watch(
+            os.path.abspath(directory),
+            remote_url,
+            remote_username,
+            remote_dir,
+            enable,
+            delete
+        ))
 
     def watches(self, enabled=None) -> list:
         """ Returns a list with all the watches in the watch list """
@@ -108,48 +110,65 @@ class Watch2Upload:
 
     def remove_watch(self, directory):
         """
-
         :param directory:
         :raise DirectoryNotFoundError: if the specified directory is not
                                        found in the watch list
         """
-        full_directory = os.path.abspath(directory)
-
-        watch_to_remove = None
-        for watch in self._watches:
-            if watch.directory == full_directory:
-                watch_to_remove = watch
-
-        if watch_to_remove is None:
-            raise DirectoryNotFoundError("directory `%s` not found in watch "
-                                         "list" % directory)
-
-        self._watches.remove(watch_to_remove)
+        watch = self._find_watch(directory)
+        self._watches.remove(watch)
 
     def enable_watch(self, directory):
-        full_directory = os.path.abspath(directory)
-
-        watch_to_enable = None
-        for watch in self._watches:
-            if watch.directory == full_directory:
-                watch_to_enable = watch
-
-        if watch_to_enable is None:
-            raise DirectoryNotFoundError("directory `%s` not found in watch "
-                                         "list" % directory)
-
-        watch_to_enable.enable = True
+        watch = self._find_watch(directory)
+        watch.enable = True
 
     def disable_watch(self, directory):
-        full_directory = os.path.abspath(directory)
+        watch = self._find_watch(directory)
+        watch.enable = False
 
-        watch_to_disable = None
+    def set_conf(self, directory, config, value):
+        """
+        Sets a value for the configuration identified by the specified
+        key/label.
+
+        :param directory: watched directory to configure
+        :param config:    key for the configuration to set value for
+        :param value:     value to set for the configuration
+        :raise KeyError:   if the specified config key was not recognized
+        :raise ValueError: if the specified value is invalid for the
+                           specified configuration
+        """
+        watch = self._find_watch(directory)
+
+        if config == 'remote-dir':
+            watch.remote_dir = value
+
+        elif config == 'remote-url':
+            watch.remote_url = value
+
+        elif config == 'remote-username':
+            watch.remote_username = value
+
+        elif config == 'remote-password':
+            # This will change in the actual application
+            pass
+
+        elif config == 'delete':
+            if value == "1":
+                watch.delete = True
+            elif value == "0":
+                watch.delete = False
+            else:
+                raise ValueError("unexpected value `%s`" % value)
+
+        else:
+            raise KeyError("unrecognized key")
+
+    def _find_watch(self, directory):
+        full_directory = os.path.abspath(directory)
         for watch in self._watches:
             if watch.directory == full_directory:
-                watch_to_disable = watch
+                return watch
 
-        if watch_to_disable is None:
-            raise DirectoryNotFoundError("directory `%s` not found in watch "
-                                         "list" % directory)
-
-        watch_to_disable.enable = False
+        # Did not find watch: raise error
+        raise DirectoryNotFoundError(
+            "directory `%s` not found in watch list" % directory)
