@@ -58,7 +58,7 @@ def main():
     try:
         command = commands[command_name]
     except KeyError:
-        print("Command '%s' was not recognized, see \"w2c --help\"" %
+        print("Command '%s' was not recognized, see \"w2u --help\"" %
               command_name, file=sys.stderr)
         sys.exit(1)
 
