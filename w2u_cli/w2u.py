@@ -35,6 +35,7 @@ commands = {
     'disable': cmds.disable,
     'set': cmds.set,
     'get': cmds.get,
+    'remote': cmds.remote,
 }
 
 

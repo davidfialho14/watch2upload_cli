@@ -12,6 +12,10 @@ class RemoteNotFoundError(Exception):
     """ Raised when a remote is not found """
 
 
+class RemoteExistsError(Exception):
+    """ Raised trying to add a remote that already exists """
+
+
 class DirectoryNotFoundError(Exception):
     """ Raised when a directory is not found in the watch list """
 
@@ -125,7 +129,7 @@ class Watch2Upload:
         watch = self._find_watch(directory)
         watch.enable = False
 
-    def set_conf(self, directory, config, value):
+    def set_watch_conf(self, directory, config, value):
         """
         Sets a value for the configuration identified by the specified
         key/label.
@@ -163,9 +167,9 @@ class Watch2Upload:
                 raise ValueError("unexpected value `%s`" % value)
 
         else:
-            raise KeyError("unrecognized key")
+            raise KeyError("unrecognized configuration key")
 
-    def get_conf(self, directory, config):
+    def get_watch_conf(self, directory, config):
         """
         Gets the value for the configuration identified by the specified
         key/label.
@@ -192,6 +196,34 @@ class Watch2Upload:
 
         else:
             raise KeyError("unrecognized key")
+
+    def add_remote(self, url, username, password):
+
+        # TODO Validate URL
+
+        # Check if remote already exists
+        for remote in self._remotes.values():
+            if remote == (url, username):
+                raise RemoteExistsError()
+
+    def remotes(self) -> list:
+        return [Remote(id, remote[0], remote[1])
+                for id, remote in self._remotes.items()]
+
+    def remove_remote(self, remote_id):
+        try:
+            del self._remotes[remote_id]
+        except KeyError:
+            raise RemoteNotFoundError()
+
+    def get_remote_conf(self, remote_id, config):
+
+        if config == "url":
+            return self._remotes[remote_id][0]
+        elif config == "username":
+            return self._remotes[remote_id][1]
+        else:
+            raise KeyError("unrecognized configuration key")
 
     def _find_watch(self, directory):
         full_directory = os.path.abspath(directory)
