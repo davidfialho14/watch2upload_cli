@@ -1,5 +1,7 @@
 import os
 from collections import namedtuple
+from urllib.parse import urlparse
+
 from recordclass import recordclass
 
 Watch = recordclass("Watch", "directory remote_url remote_username "
@@ -199,7 +201,7 @@ class Watch2Upload:
 
     def add_remote(self, url, username, password):
 
-        # TODO Validate URL
+        self._validate_url(url)
 
         # Check if remote already exists
         for remote in self._remotes.values():
@@ -234,3 +236,16 @@ class Watch2Upload:
         # Did not find watch: raise error
         raise DirectoryNotFoundError(
             "directory `%s` not found in watch list" % directory)
+
+    def _validate_url(self, url: str):
+        """
+        Validates an url in string format. It checks if the URL scheme is
+        actually http/https.
+
+        Raises a ValueError if the URL is not a valid HTTP url.
+        """
+        result = urlparse(url)
+
+        if result.scheme not in ('http', 'https') \
+                or not result.netloc or not result.path:
+            raise ValueError("URL is not valid: %s" % url)
