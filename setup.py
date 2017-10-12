@@ -12,7 +12,7 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['docopt'],
+    install_requires=['docopt', 'prettytable', 'recordclass'],
 
     entry_points={
         'console_scripts': [
